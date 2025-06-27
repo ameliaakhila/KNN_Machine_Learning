@@ -3,12 +3,9 @@
     <!-- Sidebar scroll-->
     <div>
         <div class="brand-logo d-flex align-items-center justify-content-between">
-            <a href="/" class="text-nowrap logo-img">
-                <img src="assets/images/logos/logo.svg" alt="" />
+            <a href="/" class="text-nowrap logo-img mx-auto">
+                <img src="assets/images/logos/logo.png" alt="" height="75px" />
             </a>
-            <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
-                <i class="ti ti-x fs-6"></i>
-            </div>
         </div>
         <!-- Sidebar navigation-->
         <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
@@ -71,7 +68,9 @@
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a class="sidebar-link justify-content-between" href="#" aria-expanded="false">
+                    <a class="sidebar-link justify-content-between" href="/logout"
+                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+                        aria-expanded="false">
                         <div class="d-flex align-items-center gap-3">
                             <span class="d-flex">
                                 <i class="ti ti-logout"></i>
@@ -80,8 +79,10 @@
                         </div>
                     </a>
                 </li>
-
             </ul>
+            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                @csrf
+            </form>
         </nav>
         <!-- End Sidebar navigation -->
     </div>

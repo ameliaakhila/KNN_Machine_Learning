@@ -14,7 +14,8 @@ class SampleController extends Controller
     {
         // Ambil semua variabel (untuk referensi form atau tampilan)
         $dataVariabel = Variabel::orderBy('id')->get();
-
+        $samples = Sample::with(['data.variabel'])->get();
+        $idSample = $samples->pluck('id');
         // Ambil semua sample (diurutkan berdasarkan id_sample)
         $dataSample = Sample::with(['data.variabel'])
             ->orderBy('id')
@@ -34,110 +35,194 @@ class SampleController extends Controller
             });
         });
 
+
         // Gabungkan jika diperlukan
         $samples = $samplesVariabel->merge($samplesUji);
 
         return view('dashboard.dt-sample', compact('samplesVariabel', 'samplesUji', 'dataVariabel', 'dataSample'));
     }
 
-    public function hasilPerhitungan()
+    // ! HASIL PERHITUNGAN
+    public function hasilPerhitungan(Request $request)
     {
-        // Ambil ID variabel sesuai status
+        // Ambil nilai K dari request (GET)
+        $k = $request->input('k');
+        // Ambil variabel uji dan ID-nya
         $idVariabelLatih = Variabel::where('status', 'Variabel')->pluck('id')->toArray();
         $idVariabelUji = Variabel::where('status', 'Variabel Uji')->pluck('id')->toArray();
+        $samples = Sample::with('data.variabel')->orderBy('id')->get();
 
-        // Ambil semua sample dan relasi datanya
-        $samples = Sample::with('data')->get();
-
-        // Buat mapping sample berdasarkan nilai dari variabel latih dan uji
         $samplesLatih = [];
         $samplesUji = [];
 
         foreach ($samples as $sample) {
-            $dataLatih = $sample->data->whereIn('id_variabel', $idVariabelLatih)->pluck('nilai', 'id_variabel')->toArray();
-            $dataUji = $sample->data->whereIn('id_variabel', $idVariabelUji)->pluck('nilai', 'id_variabel')->toArray();
+            $data = [];
 
-            if (!empty($dataLatih)) {
+            foreach ($sample->data as $item) {
+                $data[$item->id_variabel] = $item->nilai;
+            }
+
+            $dataUji = array_intersect_key($data, array_flip($idVariabelUji));
+            $dataLatih = array_intersect_key($data, array_flip($idVariabelLatih));
+
+            if (count($dataUji) === count($idVariabelUji)) {
+                $samplesUji[$sample->id] = $dataUji;
+            } elseif (count($dataLatih) === count($idVariabelLatih)) {
                 $samplesLatih[$sample->id] = $dataLatih;
             }
-
-            if (!empty($dataUji)) {
-                $samplesUji[$sample->id] = $dataUji;
-            }
         }
 
+        //! Hitung jumlah data uji
+        $jumlahDataUji = count($samplesUji);
+        $akar = floor(sqrt($jumlahDataUji));
+        $start = ($akar % 2 === 0) ? $akar - 1 : $akar;
+
+        $options = [];
+        for ($i = $start; count($options) < 5 && $i > 0; $i -= 2) {
+            $options[] = $i;
+        }
+        sort($options);
+
+        // Jika tidak ada input k, ambil default ke nilai terbesar dari opsi
+        if (!$k && count($options)) {
+            $k = max($options);
+        }
+
+        // Hitung jarak euclidean
         $results = [];
 
-        foreach ($samplesUji as $ujiId => $dataUji) {
-            foreach ($samplesLatih as $latihId => $dataLatih) {
-                $totalSquaredDiff = 0;
-                $detail = [];
+        foreach ($samplesLatih as $latihId => $dataLatih) {
+            $baris = [];
+            $klasifikasi = [];
 
-                foreach ($idVariabelLatih as $id_var) {
-                    $nilaiUji = $dataUji[$id_var] ?? 0;
-                    $nilaiLatih = $dataLatih[$id_var] ?? 0;
+            foreach ($samplesUji as $ujiId => $dataUji) {
+                $totalSquared = 0;
+                $index = 0;
+
+                foreach ($dataUji as $idUji => $nilaiUji) {
+                    $nilaiLatih = array_values($dataLatih)[$index] ?? null;
+
+                    if ($nilaiLatih === null || $nilaiUji === null) {
+                        $index++;
+                        continue;
+                    }
 
                     $selisihKuadrat = pow($nilaiLatih - $nilaiUji, 2);
-                    $totalSquaredDiff += $selisihKuadrat;
-
-                    $detail[] = [
-                        'id_variabel' => $id_var,
-                        'hasil_dist' => round($selisihKuadrat, 4),
-                    ];
+                    $totalSquared += $selisihKuadrat;
+                    $index++;
                 }
 
-                $distance = sqrt($totalSquaredDiff);
-
-                $results[] = [
-                    'uji_id' => $ujiId,
-                    'latih_id' => $latihId,
-                    'distance' => round($distance, 4),
-                    'data' => collect($detail),
-                ];
+                $distance = sqrt($totalSquared);
+                $baris[] = $distance;
             }
+            $results[] = $baris;
         }
 
-        $dataHasil = Variabel::where('status', 'Variabel')->get();
 
-        return view('dashboard.dt-hasil', compact('results', 'dataHasil'));
+        // ! Hitung Klasifikasi
+        $klasifikasi = [];
 
+
+        foreach (array_keys($samplesUji) as $ujiIndex => $ujiId) {
+            $jarakUntukUji = array_column($results, $ujiIndex);
+            $latihIds = array_keys($samplesLatih);
+
+            $gabungan = [];
+            foreach ($jarakUntukUji as $i => $jarak) {
+                $gabungan[] = [
+                    'id' => $latihIds[$i],
+                    'jarak' => $jarak,
+                ];
+            }
+
+            // Urutkan berdasarkan jarak terdekat
+            usort($gabungan, fn($a, $b) => $a['jarak'] <=> $b['jarak']);
+
+            // Ambil K tetangga terdekat
+            $tetangga = array_slice($gabungan, 0, $k);
+
+            // Hitung jumlah class
+            $classCounts = [];
+            foreach ($tetangga as $t) {
+                $sample = Sample::with('data')->find($t['id']);
+                $class = optional($sample->data->last())->class;
+
+                if ($class) {
+                    $classCounts[$class] = ($classCounts[$class] ?? 0) + 1;
+                }
+            }
+
+            arsort($classCounts);
+            $hasil = array_key_first($classCounts);
+            $klasifikasi[$ujiId] = $hasil;
+        }
+
+        // Hitung jumlah klasifikasi per kelas
+        $jumlahPerClass = array_count_values($klasifikasi);
+        if (!empty($jumlahPerClass)) {
+            $nilaiMaksimal = max($jumlahPerClass);
+        } else {
+            $nilaiMaksimal = 0;
+        }
+
+        return view('dashboard.dt-hasil', compact('results', 'samplesUji', 'options', 'k', 'klasifikasi', 'jumlahPerClass', 'nilaiMaksimal'));
     }
 
+    // ! CREATE
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
             'id_variabel' => 'required|array',
+            'id_data' => 'required|array',
             'nilai' => 'required|array',
+            'nilai.*' => 'required|numeric',
+            'class' => 'required|string',
         ]);
 
         try {
-            // Buat sample baru, ID-nya auto-increment
-            $sample = Sample::create();
-
             $count = count($request->id_variabel);
 
+            if (
+                $count !== count($request->id_data) ||
+                $count !== count($request->nilai)
+            ) {
+                return redirect()
+                    ->back()
+                    ->withInput()
+                    ->with('error', 'Jumlah elemen id_variabel, id_data, dan nilai tidak sesuai.');
+            }
+
+
+            // Buat sample baru, ID-nya auto-increment
+            $sample = Sample::create([
+                'id_variabel' => $request->id_variabel[0],
+                'id_data' => $request->id_data[0],
+            ]);
+
+            // Ambil nilai class dari input tunggal
+            $class = $request->class;
+
+            // Simpan data untuk setiap variabel
             for ($i = 0; $i < $count; $i++) {
                 $idVariabel = $request->id_variabel[$i];
-                $nilai = $request->nilai[$i];
+                $idData = $request->id_data[$i];
+                $nilai = $request->nilai[$i] ?? null;
 
-                // Ambil semua data existing untuk id_variabel ini (selain sample sekarang)
-                $existingData = Data::where('id_variabel', $idVariabel)
-                    ->where('id_sample', '!=', $sample->id)
-                    ->get();
-
-                $totalDistance = 0;
-                foreach ($existingData as $data) {
-                    $totalDistance += pow($nilai - $data->nilai, 2);
+                if ($nilai === null) {
+                    return redirect()
+                        ->back()
+                        ->withInput()
+                        ->with('error', "Nilai ke-" . ($i + 1) . " tidak ditemukan.");
                 }
-
-                $hasil_dist = $existingData->count() > 0 ? sqrt($totalDistance) : 0;
 
                 // Simpan ke tabel data
                 Data::create([
                     'id_sample' => $sample->id,
                     'id_variabel' => $idVariabel,
+                    'id_data' => $idData,
                     'nilai' => $nilai,
-                    'hasil_dist' => $hasil_dist,
+                    'class' => $class,
+                    'hasil_dist' => 0,
                     'hasil_k' => 0,
                 ]);
             }
@@ -154,64 +239,56 @@ class SampleController extends Controller
         }
     }
 
+    // ! READ
+    public function show($id): View|RedirectResponse
+    {
+        try {
+            // Ambil data sample berdasarkan ID dengan relasi data dan variabel
+            $sample = Sample::with(['data.variabel'])->findOrFail($id);
+
+            return view('data-sample.show', compact('sample'));
+        } catch (\Exception $e) {
+            return redirect()
+                ->route('dataSample.index')
+                ->with('error', 'Data sample tidak ditemukan: ' . $e->getMessage());
+        }
+    }
+
+    // ! UPDATE
     public function update(Request $request, $id): RedirectResponse
     {
         $request->validate([
-            'id_variabel' => 'required|array',
+            'id_data' => 'required|array',
             'nilai' => 'required|array',
+            'nilai.*' => 'required|numeric',
+            'class' => 'required|string',
         ]);
 
         try {
-            // Ambil sample yang ingin diupdate
-            $sample = Sample::findOrFail($id);
+            $count = count($request->id_data);
 
-            // Hapus data lama terkait sample ini
-            Data::where('id_sample', $sample->id)->delete();
+            if ($count !== count($request->nilai)) {
+                return redirect()
+                    ->back()
+                    ->withInput()
+                    ->with('error', 'Jumlah elemen id_data dan nilai tidak sesuai.');
+            }
 
-            // Simpan nilai input ke dalam array: [id_variabel => nilai]
-            $inputData = [];
-            $count = count($request->id_variabel);
+            $class = $request->class;
             for ($i = 0; $i < $count; $i++) {
-                $inputData[$request->id_variabel[$i]] = $request->nilai[$i];
-            }
+                $idData = $request->id_data[$i];
+                $nilai = $request->nilai[$i];
 
-            // Ambil semua sample sebelumnya
-            $existingSamples = Sample::with('data')->where('id', '!=', $sample->id)->get();
-
-            // Hitung jarak ke semua sample lama
-            $distances = [];
-            foreach ($existingSamples as $existingSample) {
-                $total = 0;
-
-                foreach ($inputData as $idVar => $nilaiBaru) {
-                    // Ambil nilai dari sample lama untuk id_variabel yg sama
-                    $dataLama = $existingSample->data->firstWhere('id_variabel', $idVar);
-                    if ($dataLama) {
-                        $total += pow($nilaiBaru - $dataLama->nilai, 2);
-                    }
-                }
-
-                $jarak = sqrt($total);
-                $distances[] = $jarak;
-            }
-
-            // Hitung rata-rata jarak dari semua sample lama
-            $hasil_dist = count($distances) > 0 ? array_sum($distances) / count($distances) : 0;
-
-            // Simpan semua nilai ke tabel `data`
-            foreach ($inputData as $idVariabel => $nilai) {
-                Data::create([
-                    'id_sample' => $sample->id,
-                    'id_variabel' => $idVariabel,
+                $data = Data::findOrFail($idData);
+                $data->update([
                     'nilai' => $nilai,
-                    'hasil_dist' => $hasil_dist,
-                    'hasil_k' => 0,
+                    'class' => $class,
                 ]);
             }
 
             return redirect()
                 ->route('dataSample.index')
-                ->with('success', 'Data sample berhasil diperbarui!');
+                ->with('success', 'Nilai data sample berhasil diperbarui!');
         } catch (\Exception $e) {
             return redirect()
                 ->back()
@@ -221,6 +298,7 @@ class SampleController extends Controller
     }
 
 
+    // ! DESTROY
     public function destroy($id): RedirectResponse
     {
         try {

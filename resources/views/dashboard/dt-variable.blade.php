@@ -11,7 +11,7 @@
 @endforeach
 
 <div class="navbar-collapse" data-aos="fade-up" data-aos-anchor-placement="top-bottom">
-    <h2>Data Variabel</h2>
+    <h2 class="fs-9 fw-bolder text-primary text-shadow">Data Variabel</h2>
 </div>
 
 <div class="card" data-aos="fade-up" data-aos-anchor-placement="top-bottom" data-aos-delay="300">
@@ -44,7 +44,6 @@
                                     <td class="text-center">
                                         <form onsubmit="return confirm('Apakah Anda Yakin ?');"
                                         action="{{ route('dataVariabel.destroy', $row->id) }}" method="POST">
-                                        <a href="{{ route('dataVariabel.show', $row->id) }}" class="btn btn-sm btn-success"><i class="ti ti-eye"></i></a>
                                         <a class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#edit{{ $row->id }}"><i class="ti ti-edit"></i></a>
                                         @csrf
                                             @method('DELETE')

@@ -26,7 +26,7 @@ class DataController extends Controller
             'keterangan' => 'required|string'
         ]);
 
-        Data::create($request->only(['variabel', 'nilai', 'status', 'keterangan']));
+        Data::create($request->only(['variabel', 'nilai', 'class', 'status', 'keterangan']));
 
         return redirect()->route('data.index')->with('success', 'Data berhasil disimpan!');
     }

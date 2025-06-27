@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Data extends Model
 {
-    protected $fillable = ['id_sample', 'id_variabel', 'nilai', 'hasil_dist', 'hasil_k'];
+    protected $fillable = ['id_sample', 'id_variabel', 'nilai', 'class', 'hasil_dist', 'hasil_k'];
 
     public function variabel()
     {
