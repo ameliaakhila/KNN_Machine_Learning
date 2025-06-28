@@ -1,29 +1,28 @@
 <?php
 
-use App\Http\Controllers\DataController;
-use App\Http\Controllers\SampleController;
-use App\Http\Controllers\variabelController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DataController;
+use App\Http\Controllers\SampleController;
+use App\Http\Controllers\VariabelController;
 
-
+//! ================== AUTH ==================
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-
+//! ================== AUTHENTICATED ROUTES ==================
 Route::middleware('auth')->group(function () {
 
-    // Halaman dashboard
+    //! Dashboard
     Route::view('/', 'dashboard.dashboard')->name('dashboard');
 
-    // CRUD Variabel
-    Route::resource('dataVariabel', variabelController::class);
+    //! Data Variabel (CRUD)
+    Route::resource('dataVariabel', VariabelController::class);
 
-    // CRUD Sample
+    //! Data Sample (CRUD + Klasifikasi)
     Route::resource('dataSample', SampleController::class);
 
-    // Hasil perhitungan
-    Route::get('hasilPerhitungan', [SampleController::class, 'hasilPerhitungan']);
-
+    //! Hasil Perhitungan KNN
+    Route::get('hasilPerhitungan', [SampleController::class, 'hasilPerhitungan'])->name('hasil.perhitungan');
 });

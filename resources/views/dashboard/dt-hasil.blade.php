@@ -8,38 +8,45 @@
     <div class="navbar-collapse" data-aos="fade-up" data-aos-anchor-placement="top-bottom">
         <h2 class="fs-9 fw-bolder text-primary text-shadow">Data Hasil Distance</h2>
     </div>
-
     <div class="card" data-aos="fade-up" data-aos-anchor-placement="top-bottom" data-aos-delay="300">
         <div class="card-body">
-            <div class="table-responsive fs-4 mt-2">
-                <div class="d-md-flex align-items-center">
-                    @if (empty($samplesUji))
-                        <div class="alert alert-danger mt-3 w-100 text-center">Data belum ada.</div>
-                    @else
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th class="text-info">No</th>
-                                    @foreach ($samplesUji as $latihId => $dataUji)
-                                        <th class="text-info">Data Uji {{ $loop->iteration }}</th>
-                                    @endforeach
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($results as $latihId => $baris)
+            @if (empty($results) || empty($samplesUji))
+                <div class="alert alert-danger mt-3 text-center">
+                    Data jarak belum tersedia. Pastikan variabel latih dan variabel uji sudah dimasukkan.
+                </div>
+            @else
+                {{--! table --}}
+                <div class="table-responsive fs-4 mt-2">
+                    <div class="d-md-flex align-items-center">
+                        @if (empty($samplesUji))
+                            <div class="alert alert-danger mt-3 w-100 text-center">Data belum ada.</div>
+                        @else
+                            <table class="table">
+                                <thead>
                                     <tr>
-                                        <td>{{ $latihId + 1 }}</td>
-                                        @foreach ($baris as $value)
-                                            <td>{{ round($value, 6) }}</td>
+                                        <th class="text-info">No</th>
+                                        @foreach ($samplesUji as $latihId => $dataUji)
+                                            <th class="text-info">Data Uji {{ $loop->iteration }}</th>
                                         @endforeach
                                     </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    @endif
+                                </thead>
+                                <tbody>
+                                    @foreach ($results as $latihId => $baris)
+                                        <tr>
+                                            <td>{{ $latihId + 1 }}</td>
+                                            @foreach ($baris as $value)
+                                                <td>{{ round($value, 6) }}</td>
+                                            @endforeach
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        @endif
+                    </div>
                 </div>
-            </div>
+            @endif
         </div>
+
     </div>
 
 
@@ -51,70 +58,83 @@
 
     <div class="card" data-aos="fade-up" data-aos-anchor-placement="top-bottom" data-aos-delay="300">
         <div class="card-body">
-            <div class="table-responsive mt-2 fs-4">
-                <form method="GET" id="formK">
-                    <label for="select-k">Nilai K</label>
-                    <select class="form-select form-primary form-select-sm theme-select border-2 w-auto" id="select-k"
-                        name="k" onchange="document.getElementById('formK').submit();">
-                        @foreach ($options as $option)
-                            <option value="{{ $option }}" {{ request('k', $k) == $option ? 'selected' : '' }}>
+            @if (empty($samplesUji) || empty($klasifikasi))
+                <div class="alert alert-warning mt-3 text-center">
+                    Data klasifikasi belum tersedia. Silakan lakukan perhitungan klasifikasi.
+                </div>
+            @else
+                {{-- tabel --}}
+                <div class="table-responsive mt-2 fs-4">
+                    {{-- <form method="GET" id="formK">
+                        <label for="select-k">Nilai K</label>
+                        <select class="form-select form-primary form-select-sm theme-select border-2 w-auto" id="select-k"
+                            name="k" onchange="document.getElementById('formK').submit();">
+                            @foreach ($options as $option)
+                            <option value="{{ $option }}" {{ request('k', $k)==$option ? 'selected' : '' }}>
                                 {{ $option }}
                             </option>
-                        @endforeach
-                    </select>
-                </form>
-
-                <div class="d-md-flex align-items-center">
-                    @if (empty($samplesUji))
-                        <div class="alert alert-danger mt-3 w-100 text-center">Data belum ada.</div>
-                    @else
-                        <table class="table table-warning table-striped mt-4">
-                            <thead class="text-center align-middle">
-                                <tr>
-                                    <th class="text-primary fw-bolder">No</th>
-                                    @foreach ($samplesUji as $ujiId => $dataUji)
-                                        <th class="text-primary fw-bolder">Data Uji {{ $loop->iteration }}</th>
-                                    @endforeach
-                                </tr>
-                            </thead>
-                            <tbody class="text-center align-middle">
-                                @foreach ($results as $latihIndex => $baris)
+                            @endforeach
+                        </select>
+                    </form> --}}
+                    <div class="d-md-flex align-items-center">
+                        @if (empty($samplesUji) || empty($results))
+                            <div class="alert alert-danger mt-3 w-100 text-center">
+                                Data klasifikasi belum tersedia. Silakan lakukan perhitungan klasifikasi.
+                            </div>
+                        @else
+                            <table class="table table-warning table-striped mt-4">
+                                <thead class="text-center align-middle">
                                     <tr>
-                                        <td class="text-primary fw-bolder"><strong>{{ $latihIndex + 1 }}</strong></td>
-                                        @foreach ($baris as $value)
-                                            <td class="text-info">{{ round($value, 6) }}</td>
+                                        <th class="text-primary fw-bolder">No</th>
+                                        @foreach ($samplesUji as $ujiId => $dataUji)
+                                            <th class="text-primary fw-bolder">Data Uji {{ $loop->iteration }}</th>
                                         @endforeach
                                     </tr>
-                                @endforeach
-                                <tr>
-                                    <td class="text-primary fw-bolder"><strong>Hasil Klasifikasi</strong></td>
-                                    @foreach ($samplesUji as $ujiId => $dataUji)
-                                        <td class="text-primary fw-bolder"><strong>{{ $klasifikasi[$ujiId] ?? '-' }}</strong></td>
+                                </thead>
+                                <tbody class="text-center align-middle">
+                                    @foreach ($results as $latihIndex => $baris)
+                                        <tr>
+                                            <td class="text-primary fw-bolder"><strong>{{ $latihIndex + 1 }}</strong></td>
+                                            @foreach ($baris as $value)
+                                                <td class="text-info">{{ round($value, 6) }}</td>
+                                            @endforeach
+                                        </tr>
                                     @endforeach
-                                </tr>
-                            </tbody>
-                        </table>
-                    @endif
+                                    <tr>
+                                        <td class="text-primary fw-bolder"><strong>Hasil Klasifikasi</strong></td>
+                                        @foreach ($samplesUji as $ujiId => $dataUji)
+                                            <td class="text-primary fw-bolder">
+                                                <strong>{{ $klasifikasi[$ujiId] ?? '-' }}</strong>
+                                            </td>
+                                        @endforeach
+                                    </tr>
+                                </tbody>
+                            </table>
+                        @endif
+
+                    </div>
                 </div>
-            </div>
-            @php
-                $frekuensi = array_count_values($klasifikasi);
-                $hasilTerbanyak = '-';
-                if (!empty($frekuensi)) {
-                    $hasilTerbanyak = array_keys($frekuensi, max($frekuensi))[0];
-                }
-            @endphp
 
-            @if (!empty($frekuensi))
-                <h4 class="text-center text-info mt-4">
-                    Hasil Klasifikasinya yang Paling Sering Muncul Adalah:
-                    <span class="badge bg-primary fs-5">{{ $hasilTerbanyak }}</span>
-                </h4>
-            @else
-                <div class="alert alert-info text-center mt-4">Belum ada hasil klasifikasi untuk ditampilkan.</div>
+                @php
+                    $filteredKlasifikasi = array_filter($klasifikasi, fn($value) => is_string($value) || is_int($value));
+                    $frekuensi = array_count_values($filteredKlasifikasi);
+                    $hasilTerbanyak = $frekuensi ? array_keys($frekuensi, max($frekuensi))[0] : '-';
+                @endphp
+                @if (!empty($frekuensi))
+                    <h4 class="text-center text-info mt-4">
+                        Hasil Klasifikasinya yang Paling Sering Muncul Adalah:
+                        <span class="badge bg-primary fs-5">{{ $hasilTerbanyak }}</span>
+                    </h4>
+                @else
+                    <div class="alert alert-info text-center mt-4">Belum ada hasil klasifikasi untuk ditampilkan.</div>
+                @endif
             @endif
-
         </div>
+    </div>
+
+    {{-- ! Diagram Hasil Klasifikasi Distance --}}
+    <div class="navbar-collapse" data-aos="fade-up" data-aos-anchor-placement="top-bottom">
+        <h2 class="fs-9 fw-bolder text-primary text-shadow">Data Hasil Distance</h2>
     </div>
 
     <div class="card" data-aos="fade-up" data-aos-anchor-placement="top-bottom" data-aos-delay="300">
@@ -122,7 +142,6 @@
             <div class="d-md-flex justify-content-between align-items-center mb-3">
                 <div>
                     <h4 class="card-title fw-bolder mb-0">Jarak Data</h4>
-                    {{-- <p class="card-subtitle">Ample admin Vs Pixel admin</p> --}}
                 </div>
                 <ul class="list-inline mb-0">
                     <li class="list-inline-item text-primary">
@@ -132,7 +151,6 @@
                     </li>
                 </ul>
             </div>
-
             @if (!empty($jumlahPerClass) && count($jumlahPerClass) > 0)
                 <div id="overview" data-categories='@json(array_keys($jumlahPerClass))'
                     data-values='@json(array_values($jumlahPerClass))' class="mt-4" style="min-height: 300px;">
@@ -140,8 +158,8 @@
             @else
                 <div class="alert alert-danger text-center mt-4 mb-0" role="alert">
                     Data untuk chart <strong>Jarak Data</strong> belum tersedia.
-            </div> @endif
-
+                </div>
+            @endif
         </div>
     </div>
 

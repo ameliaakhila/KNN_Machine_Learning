@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     /**
-     * Run the migrations.
+     * ! Jalankan migrasi: membuat tabel users.
      */
     public function up(): void
     {
@@ -21,12 +21,11 @@ return new class extends Migration {
         });
     }
 
-
     /**
-     * Reverse the migrations.
+     * ! Membatalkan migrasi: menghapus tabel users.
      */
     public function down(): void
     {
-        Schema::dropIfExists('uers');
+        Schema::dropIfExists('users'); // ✅ Sudah diperbaiki dari 'uers' ke 'users'
     }
 };

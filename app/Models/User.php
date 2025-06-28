@@ -12,7 +12,9 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
-     * Atribut yang bisa diisi secara massal.
+     * ! Atribut yang dapat diisi secara massal.
+     *
+     * @var array<int, string>
      */
     protected $fillable = [
         'name',
@@ -20,11 +22,21 @@ class User extends Authenticatable
         'password',
     ];
 
+    /**
+     * ! Atribut yang disembunyikan untuk array.
+     *
+     * @var array<int, string>
+     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
+    /**
+     * ! Atribut yang dikonversi ke tipe data native.
+     *
+     * @var array<string, string>
+     */
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];

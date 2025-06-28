@@ -10,6 +10,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                     aria-label="Close"></button>
             </div>
+
             <div class="modal-body">
                 @if ($data->data && $data->data->count())
                     <h6 class="fw-bolder text-primary">Variabel</h6>
@@ -20,19 +21,22 @@
                                 <span class="badge bg-primary rounded-pill">{{ $d->nilai }}</span>
                             </li>
                         @endforeach
+
                         @php
                             $class = $data->data->last()?->class;
                         @endphp
+
                         <li
-                            class="list-group-item fw-bolder text-primary  d-flex justify-content-between align-items-center">
+                            class="list-group-item fw-bolder text-primary d-flex justify-content-between align-items-center">
                             Class :
-                            <span class="text-info">{{ empty($class) ? 'Belum diisi' : $class }}</span>
+                            <span class="text-info">{{ $class ?? 'Belum diisi' }}</span>
                         </li>
                     </ul>
                 @else
                     <p class="text-muted">Tidak ada data untuk ditampilkan.</p>
                 @endif
             </div>
+
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
             </div>
@@ -52,6 +56,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                     aria-label="Close"></button>
             </div>
+
             <div class="modal-body">
                 @php
                     $variabelUji = $data->data->where('variabel.status', 'Variabel Uji');
@@ -66,25 +71,26 @@
                                 <span class="badge bg-primary rounded-pill">{{ $d->nilai }}</span>
                             </li>
                         @endforeach
+
                         @php
                             $class = $data->data->last()?->class;
                         @endphp
+
                         <li
-                            class="list-group-item fw-bolder text-primary  d-flex justify-content-between align-items-center">
+                            class="list-group-item fw-bolder text-primary d-flex justify-content-between align-items-center">
                             Class :
-                            <span class="text-info">{{ empty($class) ? 'Belum diisi' : $class }}</span>
+                            <span class="text-info">{{ $class ?? 'Belum diisi' }}</span>
                         </li>
                     </ul>
-
                 @else
                     <p class="text-muted">Tidak ada variabel uji untuk ditampilkan.</p>
                 @endif
             </div>
+
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
             </div>
         </div>
     </div>
 </div>
-
 {{--! ======================= END MODAL DETAIL SAMPLE UJI ======================= --}}

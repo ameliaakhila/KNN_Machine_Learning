@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Sample;
 use App\Models\Variabel;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\Rule;
-use Carbon\Carbon;
 
 class VariabelController extends Controller
 {
@@ -27,13 +25,11 @@ class VariabelController extends Controller
         ]);
 
         try {
-            // Simpan variabel dan dapatkan instance-nya
-            $variabel = Variabel::create($request->only(['variabel', 'status', 'keterangan']));
-
+            Variabel::create($request->only(['variabel', 'status', 'keterangan']));
             return redirect()->route('dataVariabel.index')->with('success', 'Variabel berhasil disimpan!');
         } catch (\Exception $e) {
-            \Log::error('Gagal menyimpan data variabel: ' . $e->getMessage());
-            return redirect()->back()->withInput()->with('error', 'Gagal menyimpan variabel Silakan coba lagi!');
+            \Log::error('Gagal menyimpan variabel: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Gagal menyimpan variabel. Silakan coba lagi!');
         }
     }
 
@@ -45,8 +41,7 @@ class VariabelController extends Controller
 
     public function update(Request $request, $id): RedirectResponse
     {
-
-        $validated = $request->validate([
+        $request->validate([
             'variabel' => 'required|string|min:2',
             'status' => ['required', Rule::in(Variabel::STATUS_OPTIONS)],
             'keterangan' => 'required|string|min:1',
@@ -54,19 +49,25 @@ class VariabelController extends Controller
 
         try {
             $variabel = Variabel::findOrFail($id);
-            $variabel->update($validated);
+            $variabel->update($request->only(['variabel', 'status', 'keterangan']));
 
             return redirect()->route('dataVariabel.index')->with('success', 'Variabel berhasil diubah!');
         } catch (\Exception $e) {
-            return redirect()->back()->withInput()->with('error', 'Gagal menyimpan variabel. Silakan coba lagi!');
+            \Log::error('Gagal memperbarui variabel: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Gagal menyimpan variabel. Silakan coba lagi!');
         }
     }
 
     public function destroy($id): RedirectResponse
     {
-        $variabel = Variabel::findOrFail($id);
-        $variabel->delete();
+        try {
+            $variabel = Variabel::findOrFail($id);
+            $variabel->delete();
 
-        return redirect()->route('dataVariabel.index')->with('success', 'Variabel berhasil dihapus!');
+            return redirect()->route('dataVariabel.index')->with('success', 'Variabel berhasil dihapus!');
+        } catch (\Exception $e) {
+            \Log::error('Gagal menghapus variabel: ' . $e->getMessage());
+            return back()->with('error', 'Gagal menghapus variabel. Silakan coba lagi!');
+        }
     }
 }
