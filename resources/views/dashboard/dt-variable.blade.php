@@ -26,7 +26,7 @@
                     @if ($variabels->isEmpty())
                         <div class="alert alert-danger mt-3">Data belum ada.</div>
                     @else
-                        <table class="table mb-0 text-nowrap varient-table align-middle fs-3">
+                        <table class="table mb-0 text-nowrap varient-table align-middle fs-4">
                             <thead>
                                 <tr>
                                     <th scope="col" class="px-0 text-muted">No</th>

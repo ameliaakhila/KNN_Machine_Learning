@@ -10,7 +10,7 @@
             </div>
 
             @php
-                $variabelLatih = collect($dataVariabel)->where('status', 'Variabel');
+                $variabelLatih = collect($dataVariabel)->where('status', 'Variabel Latih');
             @endphp
 
             <div class="modal-body">

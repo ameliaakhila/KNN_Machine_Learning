@@ -17,7 +17,7 @@ class Variabel extends Model
         'keterangan',
     ];
 
-    public const STATUS_OPTIONS = ['Variabel', 'Variabel Uji'];
+    public const STATUS_OPTIONS = ['Variabel Latih', 'Variabel Uji'];
 
     public function data()
     {

@@ -34,7 +34,7 @@
 
                 @php
                     $no = 1;
-                    $variabelLatih = $dataVariabel->where('status', 'Variabel');
+                    $variabelLatih = $dataVariabel->where('status', 'Variabel Latih');
                     $samplesLatih = $dataSample->filter(function ($sample) use ($variabelLatih) {
                         return $sample->data->pluck('id_variabel')->intersect($variabelLatih->pluck('id'))->isNotEmpty();
                     });
@@ -47,7 +47,7 @@
                         </td>
                     </tr>
                 @else
-                    <table class="table mb-0 text-nowrap varient-table align-middle fs-3 shadow">
+                    <table class="table mb-0 text-nowrap varient-table align-middle fs-4 shadow">
                         <thead>
                             <tr>
                                 <th>No</th>
@@ -131,7 +131,7 @@
                         </td>
                     </tr>
                 @else
-                    <table class="table mb-0 text-nowrap varient-table align-middle fs-3">
+                    <table class="table mb-0 text-nowrap varient-table align-middle fs-4">
                         <thead>
                             <tr>
                                 <th>No</th>

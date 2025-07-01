@@ -21,6 +21,6 @@ class dtSampleDetail extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('components.dt-sample-detail');
+        return view('components.sample.dt-sample-detail');
     }
 }

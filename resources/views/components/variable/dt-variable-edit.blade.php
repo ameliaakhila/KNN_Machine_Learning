@@ -24,8 +24,8 @@
                         <select class="form-select" name="status" id="status" required>
                             <option value="" disabled {{ old('status', $data->status) ? '' : 'selected' }}>Pilih Status
                             </option>
-                            <option value="Variabel" {{ old('status', $data->status) == 'Variabel' ? 'selected' : '' }}>
-                                Variabel</option>
+                            <option value="Variabel Latih" {{ old('status', $data->status) == 'Variabel Latih' ? 'selected' : '' }}>
+                                Variabel Latih</option>
                             <option value="Variabel Uji" {{ old('status', $data->status) == 'Variabel Uji' ? 'selected' : '' }}>Variabel Uji</option>
                         </select>
                     </div>

@@ -17,7 +17,7 @@
                     @if ($data->data->count())
                         <h6 class="text-primary">Variabel</h6>
 
-                        @foreach ($data->data->where('variabel.status', 'Variabel') as $index => $d)
+                        @foreach ($data->data->where('variabel.status', 'Variabel Latih') as $index => $d)
                             <div class="mb-3">
                                 <label for="edit_latih_{{ $d->id_variabel }}" class="form-label">
                                     {{ $d->variabel->variabel ?? 'Nama variabel tidak ditemukan' }}

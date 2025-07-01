@@ -20,7 +20,7 @@ class VariabelController extends Controller
     {
         $request->validate([
             'variabel' => 'required|string',
-            'status' => 'required|in:Variabel,Variabel Uji',
+            'status' => 'required|in:Variabel Latih,Variabel Uji',
             'keterangan' => 'required|string',
         ]);
 
