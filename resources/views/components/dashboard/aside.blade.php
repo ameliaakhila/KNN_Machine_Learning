@@ -78,7 +78,7 @@
                 </li>
 
                 {{--! Logout --}}
-                <li class="sidebar-item">
+                {{-- <li class="sidebar-item">
                     <a class="sidebar-link justify-content-between" href="/logout"
                         onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
                         aria-expanded="false">
@@ -89,13 +89,13 @@
                             <span class="hide-menu">Logout</span>
                         </div>
                     </a>
-                </li>
+                </li> --}}
             </ul>
 
             {{--! Hidden Logout Form --}}
-            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+            {{-- <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                 @csrf
-            </form>
+            </form> --}}
         </nav>
         {{--! End Sidebar navigation --}}
     </div>

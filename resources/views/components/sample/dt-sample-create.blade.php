@@ -76,7 +76,7 @@
 
                         <div class="mb-3">
                             <label class="form-label">Class</label>
-                            <input type="text" class="form-control" name="class" placeholder="Masukkan nama class" required>
+                            <input type="text" class="form-control " name="class" value="null" readonly>
                         </div>
 
                         <div class="d-flex justify-content-end">

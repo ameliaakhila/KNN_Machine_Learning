@@ -52,6 +52,9 @@ class SampleController extends Controller
                 $samplesLatih[$sample->id] = $latih;
             }
         }
+        if (empty($samplesUji)) {
+            return back()->with('error', 'Data Uji Masih Kosong');
+        }
 
         $jumlahLatih = count($samplesLatih);
         $akar = floor(sqrt($jumlahLatih));
@@ -62,10 +65,6 @@ class SampleController extends Controller
             $options[] = $i;
         }
         sort($options);
-
-        if (empty($options)) {
-            return back()->with('error', 'Data Masih Kosong');
-        }
 
         $k = $k ?: max($options);
 
