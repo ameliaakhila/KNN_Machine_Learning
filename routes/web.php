@@ -15,4 +15,3 @@ Route::resource('dataSample', SampleController::class);
 
 //! Hasil Perhitungan KNN
 Route::get('hasilPerhitungan', [SampleController::class, 'hasilPerhitungan'])->name('hasil.perhitungan');
-});
