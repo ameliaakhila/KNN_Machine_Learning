@@ -6,23 +6,15 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SampleController;
 use App\Http\Controllers\VariabelController;
 
-//! ================== AUTH ==================
-// Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-// Route::post('/login', [AuthController::class, 'login']);
-// Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+//! Dashboard
+Route::view('/', 'dashboard.dashboard')->name('dashboard');
 
-//! ================== AUTHENTICATED ROUTES ==================
-// Route::middleware('auth')->group(function () {
+//! Data Variabel (CRUD)
+Route::resource('dataVariabel', VariabelController::class);
 
-    //! Dashboard
-    Route::view('/', 'dashboard.dashboard')->name('dashboard');
+//! Data Sample (CRUD + Klasifikasi)
+Route::resource('dataSample', SampleController::class);
 
-    //! Data Variabel (CRUD)
-    Route::resource('dataVariabel', VariabelController::class);
-
-    //! Data Sample (CRUD + Klasifikasi)
-    Route::resource('dataSample', SampleController::class);
-
-    //! Hasil Perhitungan KNN
-    Route::get('hasilPerhitungan', [SampleController::class, 'hasilPerhitungan'])->name('hasil.perhitungan');
+//! Hasil Perhitungan KNN
+Route::get('hasilPerhitungan', [SampleController::class, 'hasilPerhitungan'])->name('hasil.perhitungan');
 // });
