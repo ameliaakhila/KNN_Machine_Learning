@@ -1,8 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-// use App\Http\Controllers\AuthController;
-// use App\Http\Controllers\DataController;
 use App\Http\Controllers\SampleController;
 use App\Http\Controllers\VariabelController;
 
